@@ -98,7 +98,7 @@ func initSystem() {
 func main() {
 	flag.BoolVar(&dashboardCliParam.Version, "v", false, "查看当前版本号")
 	flag.StringVar(&dashboardCliParam.ConfigFile, "c", "data/config.yaml", "配置文件路径")
-	flag.StringVar(&dashboardCliParam.DatabaseLocation, "db", "data/sqlite.db", "Sqlite3数据库文件路径")
+	flag.StringVar(&dashboardCliParam.DatabaseLocation, "db", `root:1qaz2wsx@tcp(127.0.0.1:3306)/billabong?parseTime=true`, "Sqlite3数据库文件路径")
 	flag.Parse()
 
 	if dashboardCliParam.Version {

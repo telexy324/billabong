@@ -2,6 +2,7 @@ package singleton
 
 import (
 	_ "embed"
+	"gorm.io/driver/mysql"
 	"iter"
 	"log"
 	"maps"
@@ -11,7 +12,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/patrickmn/go-cache"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"sigs.k8s.io/yaml"
 
@@ -70,17 +70,41 @@ func InitFrontendTemplates() {
 
 // InitDBFromPath 从给出的文件路径中加载数据库
 func InitDBFromPath(path string) {
-	var err error
-	DB, err = gorm.Open(sqlite.Open(path), &gorm.Config{
-		CreateBatchSize: 200,
-	})
-	if err != nil {
+	//var err error
+	//DB, err = gorm.Open(sqlite.Open(path), &gorm.Config{
+	//	CreateBatchSize: 200,
+	//})
+	//if err != nil {
+	//	panic(err)
+	//}
+	//if Conf.Debug {
+	//	DB = DB.Debug()
+	//}
+	//err = DB.AutoMigrate(model.Server{}, model.User{}, model.ServerGroup{}, model.NotificationGroup{},
+	//	model.Notification{}, model.AlertRule{}, model.Service{}, model.NotificationGroupNotification{},
+	//	model.ServiceHistory{}, model.Cron{}, model.Transfer{}, model.ServerGroupServer{},
+	//	model.NAT{}, model.DDNSProfile{}, model.NotificationGroupNotification{},
+	//	model.WAF{}, model.Oauth2Bind{})
+	//if err != nil {
+	//	panic(err)
+	//}
+	mysqlConfig := mysql.Config{
+		DSN:                       path,  // DSN data source name
+		DefaultStringSize:         191,   // string 类型字段的默认长度
+		DisableDatetimePrecision:  true,  // 禁用 datetime 精度，MySQL 5.6 之前的数据库不支持
+		DontSupportRenameIndex:    true,  // 重命名索引时采用删除并新建的方式，MySQL 5.7 之前的数据库和 MariaDB 不支持重命名索引
+		DontSupportRenameColumn:   true,  // 用 `change` 重命名列，MySQL 8 之前的数据库和 MariaDB 不支持重命名列
+		SkipInitializeWithVersion: false, // 根据版本自动配置
+	}
+	if db, err := gorm.Open(mysql.New(mysqlConfig), gormConfig()); err != nil {
 		panic(err)
+	} else {
+		sqlDB, _ := db.DB()
+		sqlDB.SetMaxIdleConns(0)
+		sqlDB.SetMaxOpenConns(0)
+		DB = db.Debug()
 	}
-	if Conf.Debug {
-		DB = DB.Debug()
-	}
-	err = DB.AutoMigrate(model.Server{}, model.User{}, model.ServerGroup{}, model.NotificationGroup{},
+	err := DB.AutoMigrate(model.Server{}, model.User{}, model.ServerGroup{}, model.NotificationGroup{},
 		model.Notification{}, model.AlertRule{}, model.Service{}, model.NotificationGroupNotification{},
 		model.ServiceHistory{}, model.Cron{}, model.Transfer{}, model.ServerGroupServer{},
 		model.NAT{}, model.DDNSProfile{}, model.NotificationGroupNotification{},
@@ -88,6 +112,11 @@ func InitDBFromPath(path string) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func gormConfig() *gorm.Config {
+	config := &gorm.Config{DisableForeignKeyConstraintWhenMigrating: true}
+	return config
 }
 
 // RecordTransferHourlyUsage 对流量记录进行打点
