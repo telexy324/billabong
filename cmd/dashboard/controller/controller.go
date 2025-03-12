@@ -76,6 +76,11 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 	optionalAuth.GET("/service/:id", commonHandler(listServiceHistory))
 	optionalAuth.GET("/service/server", commonHandler(listServerWithServices))
 
+	optionalAuth.GET("/tool-group", commonHandler(listToolGroup))
+
+	optionalAuth.GET("/tool/:id", commonHandler(getToolById))
+	optionalAuth.GET("/tool", commonHandler(listTool))
+
 	auth := api.Group("", authMw)
 
 	auth.GET("/refresh-token", authMiddleware.RefreshHandler)
@@ -149,6 +154,14 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 	auth.POST("/online-user/batch-block", adminHandler(batchBlockOnlineUser))
 
 	auth.PATCH("/setting", adminHandler(updateConfig))
+
+	auth.POST("/updateTool", commonHandler(updateTool))
+	auth.POST("/tool", commonHandler(createTool))
+	auth.POST("/batch-delete/tool", commonHandler(batchDeleteTools))
+
+	auth.POST("/tool-group", commonHandler(createToolGroup))
+	auth.PATCH("/tool-group/:id", commonHandler(updateToolGroup))
+	auth.POST("/batch-delete/tool-group", commonHandler(batchDeleteToolGroup))
 
 	r.NoRoute(fallbackToFrontend(frontendDist))
 }

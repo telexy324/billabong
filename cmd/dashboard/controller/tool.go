@@ -42,7 +42,7 @@ func getToolById(c *gin.Context) (*model.Tool, error) {
 // @param request body model.Tool true
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
-// @Router /profile [post]
+// @Router /updateTool [post]
 func updateTool(c *gin.Context) (any, error) {
 	var pf model.Tool
 	if err := c.ShouldBindJSON(&pf); err != nil {
@@ -109,6 +109,11 @@ func createTool(c *gin.Context) (uint64, error) {
 	var uf model.Tool
 	if err := c.ShouldBindJSON(&uf); err != nil {
 		return 0, err
+	}
+
+	_, ok := c.Get(model.CtxKeyAuthorizedUser)
+	if !ok {
+		return 0, singleton.Localizer.ErrorT("unauthorized")
 	}
 
 	if uf.Name == "" {
