@@ -39,7 +39,7 @@ func getToolById(c *gin.Context) (*model.Tool, error) {
 // @Description Update password for current user
 // @Tags auth required
 // @Accept json
-// @param request body model.Tool true
+// @param request body model.Tool true "Tool Request"
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /updateTool [post]
@@ -60,6 +60,7 @@ func updateTool(c *gin.Context) (any, error) {
 	upDateMap["summary"] = pf.Summary
 	upDateMap["description"] = pf.Description
 	upDateMap["downloads"] = pf.Downloads
+	upDateMap["disabled"] = pf.Disabled
 
 	err := singleton.DB.Transaction(func(tx *gorm.DB) error {
 		db := tx.Where("id = ?", pf.ID).Find(&oldTool)
@@ -101,7 +102,7 @@ func listTool(c *gin.Context) ([]model.Tool, error) {
 // @Description Create tool
 // @Tags admin required
 // @Accept json
-// @param request body model.Tool true "User Request"
+// @param request body model.Tool true "Tool Request"
 // @Produce json
 // @Success 200 {object} model.CommonResponse[uint64]
 // @Router /tool [post]

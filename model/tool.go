@@ -7,4 +7,5 @@ type Tool struct {
 	Summary     string `json:"summary"`
 	Description string `json:"description"`
 	Downloads   int    `json:"downloads"`
+	Disabled    bool   `json:"disabled"`
 }
