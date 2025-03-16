@@ -39,13 +39,19 @@ func getToolById(c *gin.Context) (*model.Tool, error) {
 // @Description Update password for current user
 // @Tags auth required
 // @Accept json
-// @param request body model.Tool true "Tool Request"
+// @param request body model.ToolForm true "Tool Request"
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
-// @Router /updateTool [post]
+// @Router /tool/{id} [patch]
 func updateTool(c *gin.Context) (any, error) {
-	var pf model.Tool
-	if err := c.ShouldBindJSON(&pf); err != nil {
+	idStr := c.Param("id")
+
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var tf model.ToolForm
+	if err := c.ShouldBindJSON(&tf); err != nil {
 		return 0, err
 	}
 
@@ -56,16 +62,15 @@ func updateTool(c *gin.Context) (any, error) {
 
 	var oldTool model.Tool
 	upDateMap := make(map[string]interface{})
-	upDateMap["name"] = pf.Name
-	upDateMap["summary"] = pf.Summary
-	upDateMap["description"] = pf.Description
-	upDateMap["downloads"] = pf.Downloads
-	upDateMap["disabled"] = pf.Disabled
+	upDateMap["name"] = tf.Name
+	upDateMap["summary"] = tf.Summary
+	upDateMap["description"] = tf.Description
+	upDateMap["disabled"] = tf.Disabled
 
-	err := singleton.DB.Transaction(func(tx *gorm.DB) error {
-		db := tx.Where("id = ?", pf.ID).Find(&oldTool)
-		if oldTool.Name != pf.Name {
-			if !errors.Is(tx.Where("id <> ? AND name = ?", pf.ID, pf.Name).First(&model.Tool{}).Error, gorm.ErrRecordNotFound) {
+	err = singleton.DB.Transaction(func(tx *gorm.DB) error {
+		db := tx.Where("id = ?", id).Find(&oldTool)
+		if oldTool.Name != tf.Name {
+			if !errors.Is(tx.Where("id <> ? AND name = ?", id, tf.Name).First(&model.Tool{}).Error, gorm.ErrRecordNotFound) {
 				return singleton.Localizer.ErrorT("update tool failed: same name exists")
 			}
 		}
@@ -102,13 +107,14 @@ func listTool(c *gin.Context) ([]model.Tool, error) {
 // @Description Create tool
 // @Tags admin required
 // @Accept json
-// @param request body model.Tool true "Tool Request"
+// @param request body model.ToolForm true "Tool Request"
 // @Produce json
 // @Success 200 {object} model.CommonResponse[uint64]
 // @Router /tool [post]
 func createTool(c *gin.Context) (uint64, error) {
-	var uf model.Tool
-	if err := c.ShouldBindJSON(&uf); err != nil {
+	var tf model.ToolForm
+	var t model.Tool
+	if err := c.ShouldBindJSON(&tf); err != nil {
 		return 0, err
 	}
 
@@ -117,18 +123,22 @@ func createTool(c *gin.Context) (uint64, error) {
 		return 0, singleton.Localizer.ErrorT("unauthorized")
 	}
 
-	if uf.Name == "" {
-		return 0, singleton.Localizer.ErrorT("tool name can't be empty")
-	}
-	if uf.Summary == "" {
-		return 0, singleton.Localizer.ErrorT("tool summary can't be empty")
-	}
+	//if tf.Name == "" {
+	//	return 0, singleton.Localizer.ErrorT("tool name can't be empty")
+	//}
+	//if tf.Summary == "" {
+	//	return 0, singleton.Localizer.ErrorT("tool summary can't be empty")
+	//}
+	t.Name = tf.Name
+	t.Summary = tf.Summary
+	t.Description = tf.Description
+	t.Disabled = tf.Disabled
 
-	if err := singleton.DB.Create(&uf).Error; err != nil {
+	if err := singleton.DB.Create(&t).Error; err != nil {
 		return 0, err
 	}
 
-	return uf.ID, nil
+	return t.ID, nil
 }
 
 // Batch delete tools

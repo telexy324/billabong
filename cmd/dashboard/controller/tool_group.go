@@ -56,7 +56,7 @@ func listToolGroup(c *gin.Context) ([]*model.ToolGroupResponseItem, error) {
 // @Security BearerAuth
 // @Tags auth required
 // @Accept json
-// @Param body body model.ToolGroupForm true "ToolGroupForm"
+// @Param request body model.ToolGroupForm true "ToolGroupForm"
 // @Produce json
 // @Success 200 {object} model.CommonResponse[uint64]
 // @Router /tool-group [post]

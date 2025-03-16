@@ -155,7 +155,7 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 
 	auth.PATCH("/setting", adminHandler(updateConfig))
 
-	auth.POST("/updateTool", commonHandler(updateTool))
+	auth.PATCH("/tool/:id", commonHandler(updateTool))
 	auth.POST("/tool", commonHandler(createTool))
 	auth.POST("/batch-delete/tool", commonHandler(batchDeleteTools))
 
