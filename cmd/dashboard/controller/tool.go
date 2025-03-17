@@ -65,7 +65,7 @@ func updateTool(c *gin.Context) (any, error) {
 	upDateMap["name"] = tf.Name
 	upDateMap["summary"] = tf.Summary
 	upDateMap["description"] = tf.Description
-	upDateMap["disabled"] = tf.Disabled
+	upDateMap["enabled"] = tf.Enabled
 
 	err = singleton.DB.Transaction(func(tx *gorm.DB) error {
 		db := tx.Where("id = ?", id).Find(&oldTool)
@@ -132,7 +132,7 @@ func createTool(c *gin.Context) (uint64, error) {
 	t.Name = tf.Name
 	t.Summary = tf.Summary
 	t.Description = tf.Description
-	t.Disabled = tf.Disabled
+	t.Enabled = tf.Enabled
 
 	if err := singleton.DB.Create(&t).Error; err != nil {
 		return 0, err
