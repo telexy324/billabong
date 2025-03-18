@@ -13,3 +13,5 @@ listen_port: 8008
 location: Asia/Shanghai
 site_name: xy
 user_template: user-dist
+oss_type: local
+local_path: uploads/file

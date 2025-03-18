@@ -163,6 +163,9 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 	auth.PATCH("/tool-group/:id", commonHandler(updateToolGroup))
 	auth.POST("/batch-delete/tool-group", commonHandler(batchDeleteToolGroup))
 
+	auth.POST("/file", commonHandler(uploadFile))
+	auth.POST("/batch-delete/file", commonHandler(deleteFile))
+
 	r.NoRoute(fallbackToFrontend(frontendDist))
 }
 

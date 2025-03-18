@@ -69,6 +69,9 @@ type Config struct {
 	// HTTPS 配置
 	HTTPS HTTPSConf `koanf:"https" json:"https"`
 
+	OssType   string `koanf:"oss_type" json:"oss_type,omitempty"`
+	LocalPath string `koanf:"local_path" json:"local_path,omitempty"`
+
 	k        *koanf.Koanf `json:"-"`
 	filePath string       `json:"-"`
 }
@@ -160,6 +163,14 @@ func (c *Config) Read(path string, frontendTemplates []FrontendTemplate) error {
 		if err = c.Save(); err != nil {
 			return err
 		}
+	}
+
+	if c.OssType == "" {
+		c.OssType = "local"
+	}
+
+	if c.LocalPath == "" {
+		c.OssType = "uploads/file"
 	}
 
 	return nil
