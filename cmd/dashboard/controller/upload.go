@@ -17,7 +17,7 @@ import (
 // @Accept json
 // @param file formData file true "Upload File"
 // @Produce json
-// @Success 200 {object} model.CommonResponse[uint64]
+// @Success 200 {object} model.CommonResponse[[]model.Upload]
 // @Router /file [post]
 func uploadFile(c *gin.Context) (*model.Upload, error) {
 	//noSave := c.DefaultQuery("noSave", "0")
