@@ -1,11 +1,9 @@
 package upload
 
 import (
-	"github.com/telexy324/billabong/model"
+	"github.com/telexy324/billabong/service/singleton"
 	"mime/multipart"
 )
-
-var Conf *model.Config
 
 //@author: [ccfish86](https://github.com/ccfish86)
 //@author: [SliverHorn](https://github.com/SliverHorn)
@@ -25,7 +23,7 @@ type OSS interface {
 //@return: OSS
 
 func NewOss() OSS {
-	switch Conf.OssType {
+	switch singleton.Conf.OssType {
 	case "local":
 		return &Local{}
 	//case "qiniu":

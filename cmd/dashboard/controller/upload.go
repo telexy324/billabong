@@ -37,6 +37,7 @@ func uploadFile(c *gin.Context) (*model.Upload, error) {
 		Name: header.Filename,
 		Tag:  s[len(s)-1],
 		Key:  key,
+		Size: header.Size,
 	}
 	if err = singleton.DB.Create(&f).Error; err != nil {
 		return nil, err

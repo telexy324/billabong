@@ -7,4 +7,5 @@ type Upload struct {
 	Url  string `json:"url"`  // 文件地址
 	Tag  string `json:"tag"`  // 文件标签
 	Key  string `json:"key"`  // 编号
+	Size int64  `json:"size"`
 }

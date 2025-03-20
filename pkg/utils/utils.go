@@ -165,3 +165,14 @@ func (e *WrapError) Error() string {
 func (e *WrapError) Unwrap() error {
 	return e.errIn
 }
+
+//func FormatSize(size int64) string {
+//	units := []string{"B", "KB", "MB", "GB", "TB", "PB"}
+//	fSize := float64(size)
+//	i := 0
+//	for fSize >= 1024 && i < len(units)-1 {
+//		fSize /= 1024
+//		i++
+//	}
+//	return fmt.Sprintf("%.2f %s", fSize, units[i])
+//}

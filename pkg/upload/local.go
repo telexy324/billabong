@@ -32,12 +32,12 @@ func (*Local) UploadFile(file *multipart.FileHeader) (string, string, error) {
 	// 拼接新文件名
 	filename := name + "_" + time.Now().Format("20060102150405") + ext
 	// 尝试创建此路径
-	mkdirErr := os.MkdirAll(Conf.Location, os.ModePerm)
+	mkdirErr := os.MkdirAll(singleton.Conf.Location, os.ModePerm)
 	if mkdirErr != nil {
 		return "", "", singleton.Localizer.ErrorT("function os.MkdirAll() Filed, err:" + mkdirErr.Error())
 	}
 	// 拼接路径和文件名
-	p := Conf.LocalPath + "/" + filename
+	p := singleton.Conf.LocalPath + "/" + filename
 
 	f, openError := file.Open() // 读取文件
 	if openError != nil {
@@ -68,8 +68,8 @@ func (*Local) UploadFile(file *multipart.FileHeader) (string, string, error) {
 //@return: error
 
 func (*Local) DeleteFile(key string) error {
-	p := Conf.LocalPath + "/" + key
-	if strings.Contains(p, Conf.LocalPath) {
+	p := singleton.Conf.LocalPath + "/" + key
+	if strings.Contains(p, singleton.Conf.LocalPath) {
 		if err := os.Remove(p); err != nil {
 			return singleton.Localizer.ErrorT("本地文件删除失败, err:" + err.Error())
 		}
