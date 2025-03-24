@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"errors"
 	"gorm.io/gorm"
 	"strconv"
@@ -66,6 +67,17 @@ func updateTool(c *gin.Context) (any, error) {
 	upDateMap["summary"] = tf.Summary
 	upDateMap["description"] = tf.Description
 	upDateMap["enabled"] = tf.Enabled
+	if len(tf.Files) > 0 {
+		ids := make([]uint, 0, len(tf.Files))
+		for _, file := range tf.Files {
+			ids = append(ids, uint(file.ID))
+		}
+		if js, err := json.Marshal(ids); err != nil {
+			return nil, err
+		} else {
+			upDateMap["file_ids_raw"] = string(js)
+		}
+	}
 
 	err = singleton.DB.Transaction(func(tx *gorm.DB) error {
 		db := tx.Where("id = ?", id).Find(&oldTool)
@@ -133,6 +145,17 @@ func createTool(c *gin.Context) (uint64, error) {
 	t.Summary = tf.Summary
 	t.Description = tf.Description
 	t.Enabled = tf.Enabled
+	if len(tf.Files) > 0 {
+		ids := make([]uint, 0, len(tf.Files))
+		for _, file := range tf.Files {
+			ids = append(ids, uint(file.ID))
+		}
+		if js, err := json.Marshal(ids); err != nil {
+			return 0, err
+		} else {
+			t.FileIdsRaw = string(js)
+		}
+	}
 
 	if err := singleton.DB.Create(&t).Error; err != nil {
 		return 0, err
