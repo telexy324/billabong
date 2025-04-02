@@ -105,9 +105,34 @@ func updateTool(c *gin.Context) (any, error) {
 // @Success 200 {object} model.CommonResponse[[]model.Tool]
 // @Router /tool [get]
 func listTool(c *gin.Context) ([]model.Tool, error) {
+	idStr := c.Query("groupId")
 	var tools []model.Tool
-	if err := singleton.DB.Find(&tools).Error; err != nil {
-		return nil, err
+	if idStr != "" {
+		groupId, err := strconv.ParseUint(idStr, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		err = singleton.DB.Transaction(func(tx *gorm.DB) error {
+			var tgt []model.ToolGroupTool
+			if err = tx.Where("tool_group_id = ?", groupId).Find(&tgt).Error; err != nil {
+				return err
+			}
+			ids := make([]uint, 0, len(tgt))
+			for _, t := range tgt {
+				ids = append(ids, uint(t.ToolId))
+			}
+			if err = tx.Where("id IN (?)", ids).Find(&tools).Error; err != nil {
+				return err
+			}
+			return nil
+		})
+		if err != nil {
+			return nil, newGormError("%v", err)
+		}
+	} else {
+		if err := singleton.DB.Find(&tools).Error; err != nil {
+			return nil, err
+		}
 	}
 	return tools, nil
 }
