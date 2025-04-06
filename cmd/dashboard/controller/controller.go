@@ -81,6 +81,11 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 	optionalAuth.GET("/tool/:id", commonHandler(getToolById))
 	optionalAuth.GET("/tool", commonHandler(listTool))
 
+	optionalAuth.GET("/topic-group", commonHandler(listTopicGroup))
+
+	optionalAuth.GET("/topic/:id", commonHandler(getTopicById))
+	optionalAuth.GET("/topic", commonHandler(listTopic))
+
 	auth := api.Group("", authMw)
 
 	auth.GET("/refresh-token", authMiddleware.RefreshHandler)
@@ -165,6 +170,14 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 
 	auth.POST("/file", commonHandler(uploadFile))
 	auth.POST("/batch-delete/file", commonHandler(deleteFile))
+
+	auth.PATCH("/topic/:id", commonHandler(updateTopic))
+	auth.POST("/topic", commonHandler(createTopic))
+	auth.POST("/batch-delete/topic", commonHandler(batchDeleteTopics))
+
+	auth.POST("/topic-group", commonHandler(createTopicGroup))
+	auth.PATCH("/topic-group/:id", commonHandler(updateTopicGroup))
+	auth.POST("/batch-delete/topic-group", commonHandler(batchDeleteTopicGroup))
 
 	r.NoRoute(fallbackToFrontend(frontendDist))
 }
