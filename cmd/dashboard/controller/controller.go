@@ -57,6 +57,7 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 		log.Fatal("authMiddleware.MiddlewareInit Error:" + err.Error())
 	}
 	api := r.Group("api/v1")
+	api.StaticFS(singleton.Conf.LocalPath, http.Dir(singleton.Conf.LocalPath))
 	api.POST("/login", authMiddleware.LoginHandler)
 	api.GET("/oauth2/:provider", commonHandler(oauth2redirect))
 

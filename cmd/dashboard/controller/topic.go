@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"github.com/telexy324/billabong/pkg/markdown"
 	"gorm.io/gorm"
 	"strconv"
 
@@ -25,11 +26,12 @@ func getTopicById(c *gin.Context) (*model.Topic, error) {
 	if err != nil {
 		return nil, err
 	}
-	var topic *model.Topic
-	if err = singleton.DB.Where("id = ?", id).Find(topic).Error; err != nil {
+	var topic model.Topic
+	if err = singleton.DB.Where("id = ?", id).Find(&topic).Error; err != nil {
 		return nil, newGormError("%v", err)
 	}
-	return topic, nil
+	topic.Content = markdown.ToHTML(topic.Content)
+	return &topic, nil
 }
 
 // Update password for current user
