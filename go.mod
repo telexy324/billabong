@@ -3,6 +3,8 @@ module github.com/telexy324/billabong
 go 1.24.0
 
 require (
+	github.com/88250/lute v1.7.6
+	github.com/PuerkitoBio/goquery v1.10.2
 	github.com/appleboy/gin-jwt/v2 v2.10.1
 	github.com/chai2010/gettext-go v1.0.3
 	github.com/dustinkirkland/golang-petname v0.0.0-20240428194347-eebcea082ee0
@@ -20,6 +22,7 @@ require (
 	github.com/libdns/cloudflare v0.1.3
 	github.com/libdns/libdns v0.2.3
 	github.com/miekg/dns v1.1.63
+	github.com/mlogclub/simple v1.2.31
 	github.com/nezhahq/libdns-tencentcloud v0.0.0-20241029120103-889957240fff
 	github.com/ory/graceful v0.1.3
 	github.com/oschwald/maxminddb-golang v1.13.1
@@ -42,9 +45,7 @@ require (
 )
 
 require (
-	github.com/88250/lute v1.7.6 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
-	github.com/PuerkitoBio/goquery v1.10.2 // indirect
 	github.com/alecthomas/chroma v0.10.0 // indirect
 	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/bytedance/sonic v1.12.9 // indirect
@@ -76,7 +77,6 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
-	github.com/mlogclub/simple v1.2.31 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
