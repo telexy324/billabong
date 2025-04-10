@@ -5,6 +5,12 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	StatusOk      = iota // 正常
+	StatusDeleted        // 删除
+	StatusReview         // 待审核
+)
+
 type Topic struct {
 	Common
 	// 用户
