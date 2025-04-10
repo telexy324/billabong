@@ -150,7 +150,7 @@ func batchDeleteLikes(c *gin.Context) (any, error) {
 // @Description Post user like
 // @Tags auth required
 // @Accept json
-// @param request body model.LikeForm true "Like Request"
+// @param request body model.UserLikeForm true "Like Request"
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /like [post]
@@ -178,10 +178,10 @@ func postLike(c *gin.Context) error {
 // @Description Post user un like
 // @Tags auth required
 // @Accept json
-// @param request body model.LikeForm true "Like Request"
+// @param request body model.UserLikeForm true "Like Request"
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
-// @Router /unlike [post]
+// @Router /isLiked [post]
 func postUnLike(c *gin.Context) error {
 	var tf model.UserLikeForm
 	if err := c.ShouldBindJSON(&tf); err != nil {
@@ -197,4 +197,26 @@ func postUnLike(c *gin.Context) error {
 	} else {
 		return singleton.Localizer.ErrorT("entity unsupported")
 	}
+}
+
+// Post is liked
+// @Summary Post is liked
+// @Security BearerAuth
+// @Schemes
+// @Description Post is liked
+// @Tags auth required
+// @Accept json
+// @param request body model.UserLikeForm true "Like Request"
+// @Produce json
+// @Success 200 {object} model.CommonResponse[bool]
+// @Router /unlike [post]
+func isLiked(c *gin.Context) (bool, error) {
+	var tf model.UserLikeForm
+	if err := c.ShouldBindJSON(&tf); err != nil {
+		return false, err
+	}
+
+	uid := getUid(c)
+
+	singleton.UserLikeService.IsLiked(uid, tf.EntityId)
 }
