@@ -87,6 +87,9 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 	optionalAuth.GET("/topic/:id", commonHandler(getTopicById))
 	optionalAuth.GET("/topic", commonHandler(listTopic))
 
+	optionalAuth.GET("/favorite/:id", commonHandler(getFavoriteById))
+	optionalAuth.GET("/favorite", commonHandler(listFavorite))
+
 	auth := api.Group("", authMw)
 
 	auth.GET("/refresh-token", authMiddleware.RefreshHandler)
@@ -179,6 +182,14 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 	auth.POST("/topic-group", commonHandler(createTopicGroup))
 	auth.PATCH("/topic-group/:id", commonHandler(updateTopicGroup))
 	auth.POST("/batch-delete/topic-group", commonHandler(batchDeleteTopicGroup))
+
+	auth.POST("/like", commonHandler(postLike))
+	auth.POST("/unlike", commonHandler(postUnLike))
+	auth.POST("/isLiked", commonHandler(isLiked))
+	auth.POST("/likedIds", commonHandler(likedIds))
+
+	auth.POST("/favorite", commonHandler(postFavorite))
+	auth.POST("/unFavorite", commonHandler(postUnFavorite))
 
 	r.NoRoute(fallbackToFrontend(frontendDist))
 }

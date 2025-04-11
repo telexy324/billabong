@@ -1,13 +1,10 @@
 package controller
 
 import (
-	"encoding/json"
-	"github.com/telexy324/billabong/pkg/markdown"
-	"strconv"
-
 	"github.com/gin-gonic/gin"
 	"github.com/telexy324/billabong/model"
 	"github.com/telexy324/billabong/service/singleton"
+	"strconv"
 )
 
 // Get favorite
@@ -25,12 +22,11 @@ func getFavoriteById(c *gin.Context) (*model.Favorite, error) {
 	if err != nil {
 		return nil, err
 	}
-	var favorite model.Favorite
-	if err = singleton.DB.Where("id = ?", id).Find(&favorite).Error; err != nil {
+	var favorite *model.Favorite
+	if err = singleton.DB.Where("id = ?", id).Find(favorite).Error; err != nil {
 		return nil, newGormError("%v", err)
 	}
-	favorite.Content = markdown.ToHTML(favorite.Content)
-	return &favorite, nil
+	return favorite, nil
 }
 
 // List favorite
@@ -43,102 +39,59 @@ func getFavoriteById(c *gin.Context) (*model.Favorite, error) {
 // @Success 200 {object} model.CommonResponse[[]model.Favorite]
 // @Router /favorite [get]
 func listFavorite(c *gin.Context) ([]model.Favorite, error) {
-	idStr := c.Query("entityId")
-	typeStr := c.Query("entityType")
 	var favorites []model.Favorite
-	db := singleton.DB
-	if idStr != "" && typeStr == "" {
-		return nil, singleton.Localizer.ErrorT("should have entity type")
-	}
-	if typeStr != "" {
-		entityType, err := strconv.ParseInt(typeStr, 10, 64)
-		if err != nil {
-			return nil, err
-		}
-		if idStr != "" {
-			entityId, err := strconv.ParseUint(idStr, 10, 64)
-			if err != nil {
-				return nil, err
-			}
-			db = db.Where("entity_type = ? and entity_id = ?", entityType, entityId)
-		} else {
-			db = db.Where("entity_type = ?", entityType)
-		}
-	}
-	if err := db.Find(&favorites).Error; err != nil {
+	if err := singleton.DB.Find(&favorites).Error; err != nil {
 		return nil, err
 	}
 	return favorites, nil
 }
 
-// Create favorite
-// @Summary Create favorite
+// Post user favorite
+// @Summary Post user favorite
 // @Security BearerAuth
 // @Schemes
-// @Description Create favorite
-// @Tags admin required
+// @Description Post user favorite
+// @Tags auth required
 // @Accept json
-// @param request body model.FavoriteForm true "Favorite Request"
-// @Produce json
-// @Success 200 {object} model.CommonResponse[uint64]
-// @Router /favorite [post]
-func createFavorite(c *gin.Context) (uint64, error) {
-	var tf model.FavoriteForm
-	var t model.Favorite
-	if err := c.ShouldBindJSON(&tf); err != nil {
-		return 0, err
-	}
-
-	_, ok := c.Get(model.CtxKeyAuthorizedUser)
-	if !ok {
-		return 0, singleton.Localizer.ErrorT("unauthorized")
-	}
-
-	t.EntityType = tf.EntityType
-	t.EntityId = tf.EntityId
-	t.Content = tf.Content
-	t.ContentType = tf.ContentType
-	t.QuoteId = tf.QuoteId
-	t.LikeCount = tf.LikeCount
-	t.FavoriteCount = tf.FavoriteCount
-	t.Status = tf.Status
-	t.Images = tf.Images
-	if len(tf.Images) > 0 {
-		if js, err := json.Marshal(tf.Images); err != nil {
-			return 0, err
-		} else {
-			t.ImageList = string(js)
-		}
-	}
-
-	if err := singleton.DB.Create(&t).Error; err != nil {
-		return 0, err
-	}
-
-	return t.ID, nil
-}
-
-// Batch delete favorites
-// @Summary Batch delete favorites
-// @Security BearerAuth
-// @Schemes
-// @Description Batch delete favorites
-// @Tags admin required
-// @Accept json
-// @param request body []uint true "id list"
+// @param request body model.UserFavoriteForm true "Favorite Request"
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
-// @Router /batch-delete/favorite [post]
-func batchDeleteFavorites(c *gin.Context) (any, error) {
-	var ids []uint64
-	if err := c.ShouldBindJSON(&ids); err != nil {
+// @Router /favorite [post]
+func postFavorite(c *gin.Context) (any, error) {
+	var tf model.UserFavoriteForm
+	if err := c.ShouldBindJSON(&tf); err != nil {
 		return nil, err
 	}
-	_, ok := c.Get(model.CtxKeyAuthorizedUser)
-	if !ok {
-		return nil, singleton.Localizer.ErrorT("unauthorized")
+
+	uid := getUid(c)
+
+	if tf.EntityType == model.EntityTopic {
+		return nil, singleton.FavoriteService.AddTopicFavorite(uid, tf.EntityId)
+	} else {
+		return nil, singleton.Localizer.ErrorT("entity unsupported")
+	}
+}
+
+// Post user un favorite
+// @Summary Post user un favorite
+// @Security BearerAuth
+// @Schemes
+// @Description Post user un favorite
+// @Tags auth required
+// @Accept json
+// @param request body model.UserFavoriteForm true "Favorite Request"
+// @Produce json
+// @Success 200 {object} model.CommonResponse[any]
+// @Router /unFavorite [post]
+func postUnFavorite(c *gin.Context) (any, error) {
+	var tf model.UserFavoriteForm
+	if err := c.ShouldBindJSON(&tf); err != nil {
+		return nil, err
 	}
 
-	err := singleton.DB.Delete(&[]model.Favorite{}, "id in ?", ids).Error
-	return nil, err
+	if tf.EntityType == model.EntityTopic {
+		return nil, singleton.FavoriteService.Delete(tf.EntityId)
+	} else {
+		return nil, singleton.Localizer.ErrorT("entity unsupported")
+	}
 }

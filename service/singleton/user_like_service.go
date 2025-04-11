@@ -36,7 +36,7 @@ func (s *userLikeService) Exists(userId uint64, entityType int, entityId uint64)
 }
 
 // 是否点赞，返回已点赞实体编号
-func (s *userLikeService) IsLiked(userId int64, entityType int, entityIds []uint64) (likedEntityIds []uint64, err error) {
+func (s *userLikeService) IsLiked(userId uint64, entityType int, entityIds []uint64) (likedEntityIds []uint64, err error) {
 	var userLikes []model.UserLike
 	if err = DB.Where("user_id = ?", userId).Where("entity_id in ?", entityIds).Where("entity_type = ?", entityType).Find(&userLikes).Error; err != nil {
 		return nil, err
@@ -48,13 +48,13 @@ func (s *userLikeService) IsLiked(userId int64, entityType int, entityIds []uint
 }
 
 // TopicLike 话题点赞
-func (s *userLikeService) TopicLike(userId uint64, topicId uint64) error {
+func (s *userLikeService) TopicLike(userId uint64, topicId uint64) (int64, error) {
 	var topic model.Topic
 	if err := DB.Where("id = ?", topicId).Find(&topic).Error; err != nil {
-		return err
+		return 0, err
 	}
 	if topic.Status != model.StatusOk {
-		return errors.New("话题不存在")
+		return 0, errors.New("话题不存在")
 	}
 
 	if err := DB.Transaction(func(tx *gorm.DB) error {
@@ -68,7 +68,7 @@ func (s *userLikeService) TopicLike(userId uint64, topicId uint64) error {
 		}
 		return tx.Update("like_count", oldTopic.LikeCount+1).Error
 	}); err != nil {
-		return err
+		return 0, err
 	}
 
 	//// 发送事件
@@ -78,16 +78,16 @@ func (s *userLikeService) TopicLike(userId uint64, topicId uint64) error {
 	//	EntityType: constants.EntityTopic,
 	//})
 
-	return nil
+	return topic.LikeCount + 1, nil
 }
 
-func (s *userLikeService) TopicUnLike(userId uint64, topicId uint64) error {
+func (s *userLikeService) TopicUnLike(userId uint64, topicId uint64) (int64, error) {
 	var topic model.Topic
 	if err := DB.Where("id = ?", topicId).Find(&topic).Error; err != nil {
-		return err
+		return 0, err
 	}
 	if topic.Status != model.StatusOk {
-		return errors.New("话题不存在")
+		return 0, errors.New("话题不存在")
 	}
 
 	if err := DB.Transaction(func(tx *gorm.DB) error {
@@ -101,7 +101,7 @@ func (s *userLikeService) TopicUnLike(userId uint64, topicId uint64) error {
 		}
 		return tx.Update("like_count", oldTopic.LikeCount-1).Error
 	}); err != nil {
-		return err
+		return 0, err
 	}
 
 	//// 发送事件
@@ -111,17 +111,17 @@ func (s *userLikeService) TopicUnLike(userId uint64, topicId uint64) error {
 	//	EntityType: constants.EntityTopic,
 	//})
 
-	return nil
+	return topic.LikeCount - 1, nil
 }
 
 // CommentLike 话题点赞
-func (s *userLikeService) CommentLike(userId uint64, commentId uint64) error {
+func (s *userLikeService) CommentLike(userId uint64, commentId uint64) (int64, error) {
 	var comment model.Comment
 	if err := DB.Where("id = ?", commentId).Find(&comment).Error; err != nil {
-		return err
+		return 0, err
 	}
 	if comment.Status != model.StatusOk {
-		return errors.New("评论不存在")
+		return 0, errors.New("评论不存在")
 	}
 
 	if err := DB.Transaction(func(tx *gorm.DB) error {
@@ -135,7 +135,7 @@ func (s *userLikeService) CommentLike(userId uint64, commentId uint64) error {
 		}
 		return tx.Update("like_count", oldComment.LikeCount+1).Error
 	}); err != nil {
-		return err
+		return 0, err
 	}
 
 	//// 发送事件
@@ -145,17 +145,17 @@ func (s *userLikeService) CommentLike(userId uint64, commentId uint64) error {
 	//	EntityType: constants.EntityComment,
 	//})
 
-	return nil
+	return comment.LikeCount + 1, nil
 }
 
 // CommentLike 话题点赞
-func (s *userLikeService) CommentUnLike(userId uint64, commentId uint64) error {
+func (s *userLikeService) CommentUnLike(userId uint64, commentId uint64) (int64, error) {
 	var comment model.Comment
 	if err := DB.Where("id = ?", commentId).Find(&comment).Error; err != nil {
-		return err
+		return 0, err
 	}
 	if comment.Status != model.StatusOk {
-		return errors.New("评论不存在")
+		return 0, errors.New("评论不存在")
 	}
 
 	if err := DB.Transaction(func(tx *gorm.DB) error {
@@ -169,7 +169,7 @@ func (s *userLikeService) CommentUnLike(userId uint64, commentId uint64) error {
 		}
 		return tx.Update("like_count", oldComment.LikeCount-1).Error
 	}); err != nil {
-		return err
+		return 0, err
 	}
 
 	//// 发送事件
@@ -179,7 +179,7 @@ func (s *userLikeService) CommentUnLike(userId uint64, commentId uint64) error {
 	//	EntityType: constants.EntityComment,
 	//})
 
-	return nil
+	return comment.LikeCount - 1, nil
 }
 
 func (s *userLikeService) like(tx *gorm.DB, userId uint64, entityType int, entityId uint64) error {
