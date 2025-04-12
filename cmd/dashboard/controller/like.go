@@ -81,7 +81,7 @@ func isLiked(c *gin.Context) (bool, error) {
 
 	uid := getUid(c)
 
-	return singleton.UserLikeService.Exists(uid, tf.EntityType, tf.EntityId), nil
+	return singleton.UserLikeService.Exists(uid, tf.EntityType, tf.EntityId)
 }
 
 // Post liked ids

@@ -28,11 +28,15 @@ func (s *userLikeService) Recent(entityType string, entityId int64, count int) (
 }
 
 // Exists 是否点赞
-func (s *userLikeService) Exists(userId uint64, entityType int, entityId uint64) bool {
-	if err := DB.Where("user_id = ?", userId).Where("entity_id = ?", entityId).Where("entity_type = ?", entityType).Find(&model.UserLike{}).Error; err != nil {
-		return false
+func (s *userLikeService) Exists(userId uint64, entityType int, entityId uint64) (bool, error) {
+	var count int64
+	if err := DB.Where("user_id = ?", userId).Where("entity_id = ?", entityId).Where("entity_type = ?", entityType).Find(&model.UserLike{}).Count(&count).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return false, err
 	}
-	return true
+	if count > 0 {
+		return true, nil
+	}
+	return false, nil
 }
 
 // 是否点赞，返回已点赞实体编号
@@ -63,10 +67,8 @@ func (s *userLikeService) TopicLike(userId uint64, topicId uint64) (int64, error
 		}
 		// 更新点赞数
 		var oldTopic model.Topic
-		if err := tx.Where("id = ?", topicId).Find(&oldTopic).Error; err != nil {
-			return err
-		}
-		return tx.Update("like_count", oldTopic.LikeCount+1).Error
+		db := tx.Where("id = ?", topicId).Find(&oldTopic)
+		return db.Update("like_count", oldTopic.LikeCount+1).Error
 	}); err != nil {
 		return 0, err
 	}
@@ -96,10 +98,8 @@ func (s *userLikeService) TopicUnLike(userId uint64, topicId uint64) (int64, err
 		}
 		// 更新点赞数
 		var oldTopic model.Topic
-		if err := tx.Where("id = ?", topicId).Find(&oldTopic).Error; err != nil {
-			return err
-		}
-		return tx.Update("like_count", oldTopic.LikeCount-1).Error
+		db := tx.Where("id = ?", topicId).Find(&oldTopic)
+		return db.Update("like_count", oldTopic.LikeCount-1).Error
 	}); err != nil {
 		return 0, err
 	}
@@ -130,10 +130,8 @@ func (s *userLikeService) CommentLike(userId uint64, commentId uint64) (int64, e
 		}
 		// 更新点赞数
 		var oldComment model.Comment
-		if err := tx.Where("id = ?", commentId).Find(&oldComment).Error; err != nil {
-			return err
-		}
-		return tx.Update("like_count", oldComment.LikeCount+1).Error
+		db := tx.Where("id = ?", commentId).Find(&oldComment)
+		return db.Update("like_count", oldComment.LikeCount+1).Error
 	}); err != nil {
 		return 0, err
 	}
@@ -164,10 +162,8 @@ func (s *userLikeService) CommentUnLike(userId uint64, commentId uint64) (int64,
 		}
 		// 更新点赞数
 		var oldComment model.Comment
-		if err := tx.Where("id = ?", commentId).Find(&oldComment).Error; err != nil {
-			return err
-		}
-		return tx.Update("like_count", oldComment.LikeCount-1).Error
+		db := tx.Where("id = ?", commentId).Find(&oldComment)
+		return db.Update("like_count", oldComment.LikeCount-1).Error
 	}); err != nil {
 		return 0, err
 	}
@@ -184,7 +180,11 @@ func (s *userLikeService) CommentUnLike(userId uint64, commentId uint64) (int64,
 
 func (s *userLikeService) like(tx *gorm.DB, userId uint64, entityType int, entityId uint64) error {
 	// 判断是否已经点赞了
-	if s.Exists(userId, entityType, entityId) {
+	isLiked, err := s.Exists(userId, entityType, entityId)
+	if err != nil {
+		return err
+	}
+	if isLiked {
 		return errors.New("已点赞")
 	}
 	// 点赞

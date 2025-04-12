@@ -26,11 +26,20 @@ func getTopicById(c *gin.Context) (*model.Topic, error) {
 	if err != nil {
 		return nil, err
 	}
+	uid := getUid(c)
 	var topic model.Topic
 	if err = singleton.DB.Where("id = ?", id).Find(&topic).Error; err != nil {
 		return nil, newGormError("%v", err)
 	}
 	topic.Content = markdown.ToHTML(topic.Content)
+	topic.Favorited, err = singleton.FavoriteService.Exists(uid, model.EntityComment, topic.ID)
+	if err != nil {
+		return nil, err
+	}
+	topic.Liked, err = singleton.UserLikeService.Exists(uid, model.EntityComment, topic.ID)
+	if err != nil {
+		return nil, err
+	}
 	return &topic, nil
 }
 

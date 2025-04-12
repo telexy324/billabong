@@ -52,8 +52,12 @@ func (s *favoriteService) AddTopicFavorite(userId, topicId uint64) error {
 
 func (s *favoriteService) like(tx *gorm.DB, userId uint64, entityType int, entityId uint64) error {
 	// 判断是否已经点赞了
-	if s.Exists(userId, entityType, entityId) {
-		return errors.New("已收藏")
+	isLiked, err := s.Exists(userId, entityType, entityId)
+	if err != nil {
+		return err
+	}
+	if isLiked {
+		return errors.New("已点赞")
 	}
 	// 点赞
 	var userLike model.UserLike
@@ -63,9 +67,13 @@ func (s *favoriteService) like(tx *gorm.DB, userId uint64, entityType int, entit
 	return tx.Create(&userLike).Error
 }
 
-func (s *favoriteService) Exists(userId uint64, entityType int, entityId uint64) bool {
-	if err := DB.Where("user_id = ?", userId).Where("entity_id = ?", entityId).Where("entity_type = ?", entityType).Find(&model.Favorite{}).Error; err != nil {
-		return false
+func (s *favoriteService) Exists(userId uint64, entityType int, entityId uint64) (bool, error) {
+	var count int64
+	if err := DB.Where("user_id = ?", userId).Where("entity_id = ?", entityId).Where("entity_type = ?", entityType).Find(&model.Favorite{}).Count(&count).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return false, err
 	}
-	return true
+	if count > 0 {
+		return true, nil
+	}
+	return false, nil
 }

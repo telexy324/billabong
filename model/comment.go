@@ -24,6 +24,8 @@ type Comment struct {
 	CommentCount int64    `json:"commentCount"` // 评论数量
 	Status       int      `json:"status"`       // 状态：0：待审核、1：审核通过、2：审核失败、3：已发布
 	Images       []Upload `gorm:"-" json:"images"`
+	Liked        bool     `gorm:"-" json:"liked"`
+	Favorited    bool     `gorm:"-" json:"favorited"`
 }
 
 func (m *Comment) BeforeSave(tx *gorm.DB) error {

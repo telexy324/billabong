@@ -28,6 +28,8 @@ type Topic struct {
 	LastCommentTime   int64    `json:"lastCommentTime" form:"lastCommentTime"`          // 最后回复时间
 	LastCommentUserId int64    `json:"lastCommentUserId" form:"lastCommentUserId"`      // 最后回复用户 	// 扩展数据
 	Images            []Upload `gorm:"-" json:"images"`
+	Liked             bool     `gorm:"-" json:"liked"`
+	Favorited         bool     `gorm:"-" json:"favorited"`
 }
 
 func (m *Topic) BeforeSave(tx *gorm.DB) error {

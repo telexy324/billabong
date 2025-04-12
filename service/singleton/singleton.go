@@ -102,7 +102,7 @@ func InitDBFromPath(path string) {
 		sqlDB, _ := db.DB()
 		sqlDB.SetMaxIdleConns(0)
 		sqlDB.SetMaxOpenConns(0)
-		DB = db
+		DB = db.Debug()
 	}
 	err := DB.AutoMigrate(model.Server{}, model.User{}, model.ServerGroup{}, model.NotificationGroup{},
 		model.Notification{}, model.AlertRule{}, model.Service{}, model.NotificationGroupNotification{},
