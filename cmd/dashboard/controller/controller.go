@@ -87,6 +87,9 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 	optionalAuth.GET("/topic/:id", commonHandler(getTopicById))
 	optionalAuth.GET("/topic", commonHandler(listTopic))
 
+	optionalAuth.GET("/comment/:id", commonHandler(getCommentById))
+	optionalAuth.GET("/comment", commonHandler(listComment))
+
 	optionalAuth.GET("/favorite/:id", commonHandler(getFavoriteById))
 	optionalAuth.GET("/favorite", commonHandler(listFavorite))
 
@@ -175,13 +178,8 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 	auth.POST("/file", commonHandler(uploadFile))
 	auth.POST("/batch-delete/file", commonHandler(deleteFile))
 
-	auth.PATCH("/topic/:id", commonHandler(updateTopic))
-	auth.POST("/topic", commonHandler(createTopic))
-	auth.POST("/batch-delete/topic", commonHandler(batchDeleteTopics))
-
-	auth.POST("/topic-group", commonHandler(createTopicGroup))
-	auth.PATCH("/topic-group/:id", commonHandler(updateTopicGroup))
-	auth.POST("/batch-delete/topic-group", commonHandler(batchDeleteTopicGroup))
+	auth.POST("/comment", commonHandler(createComment))
+	auth.POST("/batch-delete/comment", commonHandler(batchDeleteComments))
 
 	auth.POST("/like", commonHandler(postLike))
 	auth.POST("/unlike", commonHandler(postUnLike))

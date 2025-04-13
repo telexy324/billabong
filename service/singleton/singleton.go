@@ -109,7 +109,7 @@ func InitDBFromPath(path string) {
 		model.ServiceHistory{}, model.Cron{}, model.Transfer{}, model.ServerGroupServer{},
 		model.NAT{}, model.DDNSProfile{}, model.NotificationGroupNotification{},
 		model.WAF{}, model.Oauth2Bind{}, model.Tool{}, model.ToolGroup{}, model.ToolGroupTool{}, model.Upload{},
-		model.Topic{}, model.TopicGroup{}, model.TopicGroupTopic{}, model.Favorite{}, model.UserLike{})
+		model.Topic{}, model.TopicGroup{}, model.TopicGroupTopic{}, model.Favorite{}, model.UserLike{}, model.Comment{})
 	if err != nil {
 		panic(err)
 	}
