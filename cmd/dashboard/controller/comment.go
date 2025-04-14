@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"github.com/telexy324/billabong/pkg/markdown"
+	"gorm.io/gorm"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -54,6 +55,7 @@ func getCommentById(c *gin.Context) (*model.Comment, error) {
 func listComment(c *gin.Context) ([]model.Comment, error) {
 	idStr := c.Query("entityId")
 	typeStr := c.Query("entityType")
+	limitStr := c.Query("limit")
 	var comments []model.Comment
 	db := singleton.DB
 	if idStr != "" && typeStr == "" {
@@ -73,6 +75,13 @@ func listComment(c *gin.Context) ([]model.Comment, error) {
 		} else {
 			db = db.Where("entity_type = ?", entityType)
 		}
+	}
+	if limitStr != "" && limitStr != "0" {
+		limit, err := strconv.ParseInt(limitStr, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		db = db.Limit(int(limit))
 	}
 	if err := db.Find(&comments).Error; err != nil {
 		return nil, err
@@ -120,7 +129,39 @@ func createComment(c *gin.Context) (uint64, error) {
 		}
 	}
 
-	if err := singleton.DB.Create(&t).Error; err != nil {
+	if err := singleton.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&t).Error; err != nil {
+			return err
+		}
+		// 更新点赞数
+		if t.EntityType == model.EntityTopic {
+			var oldTopic model.Topic
+			db := tx.Where("id = ?", t.EntityId).Find(&oldTopic)
+			upDateMap := make(map[string]interface{})
+			upDateMap["CommentCount"] = oldTopic.CommentCount + 1
+			upDateMap["LastCommentTime"] = t.CreatedAt
+			upDateMap["LastCommentUserId"] = t.UserID
+			txErr := db.Updates(upDateMap).Error
+			if txErr != nil {
+				return singleton.Localizer.ErrorT("update topic failed: %v", txErr)
+			}
+			return nil
+		} else if t.EntityType == model.EntityComment {
+			var oldComment model.Comment
+			db := tx.Where("id = ?", t.EntityId).Find(&oldComment)
+			upDateMap := make(map[string]interface{})
+			upDateMap["CommentCount"] = oldComment.CommentCount + 1
+			upDateMap["LastCommentTime"] = t.CreatedAt
+			upDateMap["LastCommentUserId"] = t.UserID
+			txErr := db.Updates(upDateMap).Error
+			if txErr != nil {
+				return singleton.Localizer.ErrorT("update topic failed: %v", txErr)
+			}
+			return nil
+		} else {
+			return singleton.Localizer.ErrorT("invalid entityType")
+		}
+	}); err != nil {
 		return 0, err
 	}
 
