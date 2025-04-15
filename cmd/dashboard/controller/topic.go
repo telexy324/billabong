@@ -1,10 +1,12 @@
 package controller
 
 import (
+	"database/sql"
 	"encoding/json"
 	"github.com/telexy324/billabong/pkg/markdown"
 	"gorm.io/gorm"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/telexy324/billabong/model"
@@ -73,21 +75,18 @@ func updateTopic(c *gin.Context) (any, error) {
 
 	var oldTopic model.Topic
 	upDateMap := make(map[string]interface{})
-	upDateMap["name"] = tf.Title
-	upDateMap["summary"] = tf.Content
-	upDateMap["description"] = tf.Recommend
-	upDateMap["enabled"] = tf.RecommendTime
-	upDateMap["name"] = tf.Sticky
-	upDateMap["summary"] = tf.StickyTime
-	upDateMap["description"] = tf.ViewCount
-	upDateMap["enabled"] = tf.CommentCount
-	upDateMap["name"] = tf.LikeCount
-	upDateMap["summary"] = tf.Status
-	upDateMap["description"] = tf.LastCommentTime
-	upDateMap["enabled"] = tf.LastCommentUserId
-	if len(tf.Images) > 0 {
-		ids := make([]uint, 0, len(tf.Images))
-		for _, image := range tf.Images {
+	upDateMap["title"] = tf.Title
+	upDateMap["content"] = tf.Content
+	upDateMap["recommend"] = tf.Recommend
+	upDateMap["sticky"] = tf.Sticky
+	upDateMap["view_count"] = tf.ViewCount
+	upDateMap["comment_count"] = tf.CommentCount
+	upDateMap["like_count"] = tf.LikeCount
+	upDateMap["status"] = tf.Status
+	upDateMap["last_comment_user_id"] = tf.LastCommentUserId
+	if len(tf.Affixes) > 0 {
+		ids := make([]uint, 0, len(tf.Affixes))
+		for _, image := range tf.Affixes {
 			ids = append(ids, uint(image.ID))
 		}
 		if js, err := json.Marshal(ids); err != nil {
@@ -176,22 +175,32 @@ func createTopic(c *gin.Context) (uint64, error) {
 	t.Title = tf.Title
 	t.Content = tf.Content
 	t.Recommend = tf.Recommend
-	t.RecommendTime = tf.RecommendTime
+	t.RecommendTime = sql.NullTime{
+		Time:  time.Unix(0, 0),
+		Valid: true,
+	}
 	t.Sticky = tf.Sticky
-	t.StickyTime = tf.StickyTime
+	t.StickyTime = sql.NullTime{
+		Time:  time.Unix(0, 0),
+		Valid: true,
+	}
 	t.ViewCount = tf.ViewCount
 	t.CommentCount = tf.CommentCount
 	t.LikeCount = tf.LikeCount
 	t.Status = tf.Status
-	t.LastCommentTime = tf.LastCommentTime
-	t.LastCommentUserId = tf.LastCommentUserId
-	if len(tf.Images) > 0 {
-		if js, err := json.Marshal(tf.Images); err != nil {
-			return 0, err
-		} else {
-			t.ImageList = string(js)
-		}
+	t.LastCommentTime = sql.NullTime{
+		Time:  time.Unix(0, 0),
+		Valid: true,
 	}
+	t.LastCommentUserId = tf.LastCommentUserId
+	//if len(tf.Affixes) > 0 {
+	//	if js, err := json.Marshal(tf.Affixes); err != nil {
+	//		return 0, err
+	//	} else {
+	//		t.AffixList = string(js)
+	//	}
+	//}
+	t.Affixes = tf.Affixes
 
 	if err := singleton.DB.Create(&t).Error; err != nil {
 		return 0, err
