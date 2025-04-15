@@ -181,6 +181,14 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 	auth.POST("/comment", commonHandler(createComment))
 	auth.POST("/batch-delete/comment", commonHandler(batchDeleteComments))
 
+	auth.PATCH("/topic/:id", commonHandler(updateTopic))
+	auth.POST("/topic", commonHandler(createTopic))
+	auth.POST("/batch-delete/topic", commonHandler(batchDeleteTopics))
+
+	auth.POST("/topic-group", commonHandler(createTopicGroup))
+	auth.PATCH("/topic-group/:id", commonHandler(updateTopicGroup))
+	auth.POST("/batch-delete/topic-group", commonHandler(batchDeleteTopicGroup))
+
 	auth.POST("/like", commonHandler(postLike))
 	auth.POST("/unlike", commonHandler(postUnLike))
 	auth.POST("/isLiked", commonHandler(isLiked))
