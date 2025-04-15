@@ -60,7 +60,7 @@ func (s *favoriteService) like(tx *gorm.DB, userId uint64, entityType int, entit
 		return errors.New("已点赞")
 	}
 	// 点赞
-	var userLike model.UserLike
+	var userLike model.Favorite
 	userLike.UserID = userId
 	userLike.EntityId = entityId
 	userLike.EntityType = entityType
