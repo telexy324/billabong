@@ -27,7 +27,7 @@ type Topic struct {
 	LikeCount         int64        `json:"likeCount" form:"likeCount"`                      // 点赞数量
 	Status            int          `json:"status" form:"status"`                            // 状态：0：正常、1：删除
 	LastCommentTime   sql.NullTime `json:"lastCommentTime" form:"lastCommentTime"`          // 最后回复时间
-	LastCommentUserId int64        `json:"lastCommentUserId" form:"lastCommentUserId"`      // 最后回复用户 	// 扩展数据
+	LastCommentUserId uint64       `json:"lastCommentUserId" form:"lastCommentUserId"`      // 最后回复用户 	// 扩展数据
 	Affixes           []Upload     `gorm:"-" json:"affixes"`
 	Liked             bool         `gorm:"-" json:"liked"`
 	Favorited         bool         `gorm:"-" json:"favorited"`

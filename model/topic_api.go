@@ -12,6 +12,7 @@ type TopicForm struct {
 	LikeCount    int64 `json:"likeCount,omitempty" validate:"optional"`    // 点赞数量
 	Status       int   `json:"status,omitempty" validate:"optional"`       // 状态：0：正常、1：删除
 	//LastCommentTime   time.Time `json:"lastCommentTime,omitempty" validate:"optional"`   // 最后回复时间
-	LastCommentUserId int64    `json:"lastCommentUserId,omitempty" validate:"optional"` // 最后回复用户 	// 扩展数据
+	LastCommentUserId uint64   `json:"lastCommentUserId,omitempty" validate:"optional"` // 最后回复用户 	// 扩展数据
 	Affixes           []Upload `json:"affixes,omitempty" validate:"optional"`
+	TopicGroup        uint64   `json:"topicGroup,omitempty" validate:"optional"`
 }

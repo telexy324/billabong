@@ -205,7 +205,24 @@ func createTopic(c *gin.Context) (uint64, error) {
 	//}
 	t.Affixes = tf.Affixes
 
-	if err := singleton.DB.Create(&t).Error; err != nil {
+	if tf.TopicGroup > 0 {
+		var count int64
+		singleton.DB.Model(&model.TopicGroup{}).Where("id = ?", tf.TopicGroup).Count(&count)
+		if count <= 0 {
+			return 0, singleton.Localizer.ErrorT("group not found")
+		}
+	}
+
+	if err := singleton.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&t).Error; err != nil {
+			return err
+		}
+		var tg model.TopicGroupTopic
+		tg.UserID = uid
+		tg.TopicId = t.ID
+		tg.TopicGroupId = tf.TopicGroup
+		return tx.Create(&tg).Error
+	}); err != nil {
 		return 0, err
 	}
 
