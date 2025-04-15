@@ -166,6 +166,9 @@ func createTool(c *gin.Context) (uint64, error) {
 	//if tf.Summary == "" {
 	//	return 0, singleton.Localizer.ErrorT("tool summary can't be empty")
 	//}
+	uid := getUid(c)
+
+	t.UserID = uid
 	t.Name = tf.Name
 	t.Summary = tf.Summary
 	t.Description = tf.Description

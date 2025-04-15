@@ -172,6 +172,9 @@ func createTopic(c *gin.Context) (uint64, error) {
 		return 0, singleton.Localizer.ErrorT("unauthorized")
 	}
 
+	uid := getUid(c)
+
+	t.UserID = uid
 	t.Title = tf.Title
 	t.Content = tf.Content
 	t.Recommend = tf.Recommend

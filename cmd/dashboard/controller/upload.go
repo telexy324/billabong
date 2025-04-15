@@ -31,14 +31,15 @@ func uploadFile(c *gin.Context) (*model.Upload, error) {
 		return nil, uploadErr
 	}
 	//if noSave == "0" {
+	uid := getUid(c)
 	s := strings.Split(header.Filename, ".")
-	f := model.Upload{
-		Url:  filePath,
-		Name: header.Filename,
-		Tag:  s[len(s)-1],
-		Key:  key,
-		Size: header.Size,
-	}
+	var f model.Upload
+	f.UserID = uid
+	f.Url = filePath
+	f.Name = header.Filename
+	f.Tag = s[len(s)-1]
+	f.Key = key
+	f.Size = header.Size
 	if err = singleton.DB.Create(&f).Error; err != nil {
 		return nil, err
 	}
