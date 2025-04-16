@@ -15,8 +15,8 @@ func newFavoriteService() *favoriteService {
 type favoriteService struct {
 }
 
-func (s *favoriteService) Delete(id uint64) error {
-	return DB.Model(&model.Favorite{}).Where("id = ?", id).Delete(&model.Favorite{}).Error
+func (s *favoriteService) Delete(userId uint64, id uint64) error {
+	return DB.Model(&model.Favorite{}).Where("user_id = ? and entity_id = ?", userId, id).Delete(&model.Favorite{}).Error
 }
 
 func (s *favoriteService) IsFavorited(userId uint64, entityType string, entityId uint64) bool {

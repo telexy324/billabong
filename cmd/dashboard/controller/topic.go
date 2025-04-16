@@ -34,11 +34,11 @@ func getTopicById(c *gin.Context) (*model.Topic, error) {
 		return nil, newGormError("%v", err)
 	}
 	topic.Content = markdown.ToHTML(topic.Content)
-	topic.Favorited, err = singleton.FavoriteService.Exists(uid, model.EntityComment, topic.ID)
+	topic.Favorited, err = singleton.FavoriteService.Exists(uid, model.EntityTopic, topic.ID)
 	if err != nil {
 		return nil, err
 	}
-	topic.Liked, err = singleton.UserLikeService.Exists(uid, model.EntityComment, topic.ID)
+	topic.Liked, err = singleton.UserLikeService.Exists(uid, model.EntityTopic, topic.ID)
 	if err != nil {
 		return nil, err
 	}

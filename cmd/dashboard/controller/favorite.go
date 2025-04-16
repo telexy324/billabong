@@ -88,9 +88,9 @@ func postUnFavorite(c *gin.Context) (any, error) {
 	if err := c.ShouldBindJSON(&tf); err != nil {
 		return nil, err
 	}
-
+	uid := getUid(c)
 	if tf.EntityType == model.EntityTopic {
-		return nil, singleton.FavoriteService.Delete(tf.EntityId)
+		return nil, singleton.FavoriteService.Delete(uid, tf.EntityId)
 	} else {
 		return nil, singleton.Localizer.ErrorT("entity unsupported")
 	}

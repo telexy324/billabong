@@ -93,7 +93,7 @@ func (s *userLikeService) TopicUnLike(userId uint64, topicId uint64) (int64, err
 	}
 
 	if err := DB.Transaction(func(tx *gorm.DB) error {
-		if err := s.like(tx, userId, model.EntityTopic, topicId); err != nil {
+		if err := s.unlike(tx, userId, model.EntityTopic, topicId); err != nil {
 			return err
 		}
 		// 更新点赞数
@@ -195,6 +195,13 @@ func (s *userLikeService) like(tx *gorm.DB, userId uint64, entityType int, entit
 	return tx.Create(&userLike).Error
 }
 
-func (s *userLikeService) unlike(tx *gorm.DB, userId int64, entityType string, entityId int64) error {
+func (s *userLikeService) unlike(tx *gorm.DB, userId uint64, entityType int, entityId uint64) error {
+	isLiked, err := s.Exists(userId, entityType, entityId)
+	if err != nil {
+		return err
+	}
+	if !isLiked {
+		return errors.New("未点赞")
+	}
 	return tx.Delete(&model.UserLike{}, "user_id = ? and entity_id = ? and entity_type = ?", userId, entityId, entityType).Error
 }
