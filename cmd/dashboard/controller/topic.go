@@ -3,7 +3,6 @@ package controller
 import (
 	"database/sql"
 	"encoding/json"
-	"github.com/telexy324/billabong/pkg/markdown"
 	"gorm.io/gorm"
 	"strconv"
 	"time"
@@ -33,16 +32,20 @@ func getTopicById(c *gin.Context) (*model.Topic, error) {
 	if err = singleton.DB.Where("id = ?", id).Find(&topic).Error; err != nil {
 		return nil, newGormError("%v", err)
 	}
-	topic.Content = markdown.ToHTML(topic.Content)
-	topic.Favorited, err = singleton.FavoriteService.Exists(uid, model.EntityTopic, topic.ID)
+	//topic.Content = markdown.ToHTML(topic.Content)
+	//topic.Favorited, err = singleton.FavoriteService.Exists(uid, model.EntityTopic, topic.ID)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//topic.Liked, err = singleton.UserLikeService.Exists(uid, model.EntityTopic, topic.ID)
+	//if err != nil {
+	//	return nil, err
+	//}
+	formedTopic, err := singleton.TopicService.BuildTopic(topic, uid)
 	if err != nil {
 		return nil, err
 	}
-	topic.Liked, err = singleton.UserLikeService.Exists(uid, model.EntityTopic, topic.ID)
-	if err != nil {
-		return nil, err
-	}
-	return &topic, nil
+	return &formedTopic, nil
 }
 
 // Update password for current user
@@ -146,7 +149,15 @@ func listTopic(c *gin.Context) ([]model.Topic, error) {
 			return nil, err
 		}
 	}
-	return topics, nil
+	var formedTopics []model.Topic
+	for _, topic := range topics {
+		formedTopic, err := singleton.TopicService.BuildTopic(topic, getUid(c))
+		if err != nil {
+			return nil, err
+		}
+		formedTopics = append(formedTopics, formedTopic)
+	}
+	return formedTopics, nil
 }
 
 // Create topic

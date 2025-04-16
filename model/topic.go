@@ -31,6 +31,7 @@ type Topic struct {
 	Affixes           []Upload     `gorm:"-" json:"affixes"`
 	Liked             bool         `gorm:"-" json:"liked"`
 	Favorited         bool         `gorm:"-" json:"favorited"`
+	UserName          string       `gorm:"-" json:"userName"`
 }
 
 func (m *Topic) BeforeSave(tx *gorm.DB) error {
