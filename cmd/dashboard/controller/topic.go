@@ -29,18 +29,17 @@ func getTopicById(c *gin.Context) (*model.Topic, error) {
 	}
 	uid := getUid(c)
 	var topic model.Topic
-	if err = singleton.DB.Where("id = ?", id).Find(&topic).Error; err != nil {
-		return nil, newGormError("%v", err)
-	}
-	//topic.Content = markdown.ToHTML(topic.Content)
-	//topic.Favorited, err = singleton.FavoriteService.Exists(uid, model.EntityTopic, topic.ID)
-	//if err != nil {
-	//	return nil, err
+	//if err = singleton.DB.Where("id = ?", id).Find(&topic).Error; err != nil {
+	//	return nil, newGormError("%v", err)
 	//}
-	//topic.Liked, err = singleton.UserLikeService.Exists(uid, model.EntityTopic, topic.ID)
-	//if err != nil {
-	//	return nil, err
-	//}
+	err = singleton.DB.Transaction(func(tx *gorm.DB) error {
+		db := tx.Where("id = ?", id).Find(&topic)
+		txErr := db.Update("view_count", topic.ViewCount+1).Error
+		if txErr != nil {
+			return singleton.Localizer.ErrorT("update topic failed: %v", txErr)
+		}
+		return nil
+	})
 	formedTopic, err := singleton.TopicService.BuildTopic(topic, uid)
 	if err != nil {
 		return nil, err
