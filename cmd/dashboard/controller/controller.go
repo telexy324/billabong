@@ -197,6 +197,9 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 	auth.POST("/favorite", commonHandler(postFavorite))
 	auth.POST("/unFavorite", commonHandler(postUnFavorite))
 
+	auth.PATCH("/user/additional/:id", commonHandler(updateUserAdditionalInfo))
+	auth.POST("/user/additional", commonHandler(createUserAdditionalInfo))
+
 	r.NoRoute(fallbackToFrontend(frontendDist))
 }
 
